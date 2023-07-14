@@ -26,7 +26,7 @@ app.get("/api", async (req, res) => {
   }
 
   try {
-    let ChatsWithGPT;
+    let Chats;
     const browser = await puppeteer.launch(options);
     const page = await browser.newPage();
     await page.setJavaScriptEnabled(true);
@@ -37,7 +37,7 @@ app.get("/api", async (req, res) => {
     if (title === "404: This page could not be found") {
       return new Error("Not Found");
     } else {
-      ChatsWithGPT = await page.evaluate(() => {
+      Chats = await page.evaluate(() => {
         const OuterGroupDiv = Array.from(
           document.querySelectorAll(
             "#__next > div.overflow-hidden.w-full.h-full.relative.flex.z-0 > div > div > main > div.flex-1.overflow-hidden > div > div > div.group"
@@ -64,14 +64,14 @@ app.get("/api", async (req, res) => {
 
     await browser.close();
 
-    res.status(201).json({ title, ChatsWithGPT });
+    res.status(201).json({ title, Chats });
   } catch (err) {
     console.error(err);
     res.status(500).json("something gone wrong");
   }
 });
 
-app.listen(process.env.PORT || 3000, () => {
+app.listen(process.env.PORT || 3300, () => {
   console.log("Server started");
 });
 
