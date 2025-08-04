@@ -9,9 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "engines": {
-    "node": "^14"
-  },
+ "engines": { "node": "18.x" },
   "dependencies": {
     "chrome-aws-lambda": "^6",
     "express": "^4.18.1",
