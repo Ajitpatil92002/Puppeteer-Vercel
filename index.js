@@ -35,27 +35,31 @@ app.get("/api", async (req, res) => {
     let title = await page.evaluate(() => document.title);
 
     if (title === "404: This page could not be found") {
-      return new Error("Not Found");
+      throw new Error("Not Found");
     } else {
       Chats = await page.evaluate(() => {
         const OuterGroupDiv = Array.from(
           document.querySelectorAll(
-            "#__next > div.overflow-hidden.w-full.h-full.relative.flex.z-0 > div > div > main > div.flex-1.overflow-hidden > div > div > div.group"
+            "div.text-base.my-auto.mx-auto.pb-10 div.agent-turn"
           )
         );
 
         let resultChats = [];
 
         for (let i = 0; i < OuterGroupDiv.length; i += 2) {
-          const question = OuterGroupDiv[i]
-            .querySelector("div > div:nth-child(2) > div > div")
-            .innerText.toString();
+          const questionElement = OuterGroupDiv[i]?.querySelector(
+            "div[data-message-author-role='user'] div.markdown.prose p"
+          );
+          const answerElement = OuterGroupDiv[i + 1]?.querySelector(
+            "div[data-message-author-role='assistant'] div.markdown.prose"
+          );
 
-          const answer = OuterGroupDiv[i + 1].querySelector(
-            "div > div:nth-child(2) > div > div > div"
-          ).innerHTML;
+          const question = questionElement ? questionElement.innerText.toString() : "";
+          const answer = answerElement ? answerElement.innerHTML : "";
 
-          resultChats.push({ question, answer });
+          if (question && answer) {
+            resultChats.push({ question, answer });
+          }
         }
 
         return resultChats;
@@ -64,10 +68,10 @@ app.get("/api", async (req, res) => {
 
     await browser.close();
 
-    res.status(201).json({ title, Chats });
+    res.status(200).json({ title, Chats });
   } catch (err) {
     console.error(err);
-    res.status(500).json("something gone wrong");
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 
