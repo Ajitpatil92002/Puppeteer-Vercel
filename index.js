@@ -1,14 +1,14 @@
-const express = require('express');
-const app = express();
+const app = require('express')();
 
-// Detect if running on Vercel/AWS Lambda (serverless) or locally
-const isServerless =
-    !!process.env.AWS_LAMBDA_FUNCTION_VERSION || !!process.env.VERCEL;
+let chrome = {};
+let puppeteer;
 
-const puppeteer = isServerless
-    ? require('puppeteer-core')
-    : require('puppeteer');
-const chrome = isServerless ? require('chrome-aws-lambda') : null;
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    chrome = require('chrome-aws-lambda');
+    puppeteer = require('puppeteer-core');
+} else {
+    puppeteer = require('puppeteer');
+}
 
 app.get('/api', async (req, res) => {
     const url = req.query.url;
@@ -19,8 +19,9 @@ app.get('/api', async (req, res) => {
 
     let browser;
     try {
-        let options;
-        if (isServerless) {
+        let options = {};
+
+        if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
             options = {
                 args: [
                     ...chrome.args,
